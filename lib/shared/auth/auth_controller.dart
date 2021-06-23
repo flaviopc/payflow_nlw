@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:payflow/modules/home/home_page.dart';
-import 'package:payflow/modules/login/login_page.dart';
 import 'package:payflow/shared/models/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,6 +9,7 @@ class AuthController {
 
   void setUser(BuildContext context, UserModel? user) {
     if (user != null) {
+      saveUser(user);
       _user = user;
       Navigator.pushReplacementNamed(context, "/home");
     } else {
@@ -26,6 +25,7 @@ class AuthController {
 
   Future<void> currentUser(BuildContext context) async {
     final instance = await SharedPreferences.getInstance();
+    await Future.delayed(Duration(seconds: 2));
     if (instance.containsKey("user")) {
       final user = instance.getString("user") as String;
       setUser(context, UserModel.fromJson(user));
