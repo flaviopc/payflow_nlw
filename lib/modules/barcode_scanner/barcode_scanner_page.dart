@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:payflow/modules/barcode_scanner/barcode_scanner_controller.dart';
+import 'package:payflow/modules/barcode_scanner/barcode_scanner_status.dart';
 import 'package:payflow/shared/themes/app_colors.dart';
 import 'package:payflow/shared/themes/app_text_styles.dart';
 import 'package:payflow/shared/widgets/bottom_sheet/bottom_sheet_widget.dart';
@@ -12,50 +14,96 @@ class BarcodeScannerPage extends StatefulWidget {
 }
 
 class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
+  final controller = BarcodeScannerController();
+
+  @override
+  void initState() {
+    controller.getAvailableCameras();
+    controller.statusNotifier.addListener(() {
+      if (controller.status.hasBarcode)
+        Navigator.pushNamed(context, "/insert_boleto");
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BottomSheetWidget(
-        primaryLabel: "Escanear novamente",
-        primaryOnPressed: () {},
-        secondaryLabel: "Digitar código",
-        secondaryOnPressed: () {},
-        title: "Não foi possivel ler um código de barras.",
-        subtitle: "Tente novamente ou digite o código.");
     return SafeArea(
-      child: RotatedBox(
-        quarterTurns: 1,
-        child: Scaffold(
-          appBar: AppBar(
-            centerTitle: true,
-            backgroundColor: Colors.black,
-            title: Text(
-              "Escanei o código de barras do boleto",
-              style: TextStyles.buttonBackground,
-            ),
-            leading: BackButton(color: AppColors.background),
+      child: Stack(
+        children: [
+          ValueListenableBuilder<BarcodeScannerStatus>(
+            valueListenable: controller.statusNotifier,
+            builder: (_, status, __) {
+              if (status.showCamera)
+                return Container(
+                  child: controller.cameraController!.buildPreview(),
+                );
+              else
+                return Container();
+            },
           ),
-          body: Column(children: [
-            Expanded(
-                child: Container(
-              color: Colors.black,
-            )),
-            Expanded(
-                flex: 2,
-                child: Container(
-                  color: Colors.transparent,
+          RotatedBox(
+            quarterTurns: 1,
+            child: Scaffold(
+              backgroundColor: Colors.transparent,
+              appBar: AppBar(
+                centerTitle: true,
+                backgroundColor: Colors.black,
+                title: Text(
+                  "Escanei o código de barras do boleto",
+                  style: TextStyles.buttonBackground,
+                ),
+                leading: BackButton(color: AppColors.background),
+              ),
+              body: Column(children: [
+                Expanded(
+                    child: Container(
+                  color: Colors.black,
                 )),
-            Expanded(
-                child: Container(
-              color: Colors.black,
-            )),
-          ]),
-          bottomNavigationBar: SetLabelButtons(
-            primaryLabel: "Inserir código do boleto",
-            primaryOnPressed: () {},
-            secondaryLabel: "Adicionar da galeria",
-            secondaryOnPressed: () {},
+                Expanded(
+                    flex: 2,
+                    child: Container(
+                      color: Colors.transparent,
+                    )),
+                Expanded(
+                    child: Container(
+                  color: Colors.black,
+                )),
+              ]),
+              bottomNavigationBar: SetLabelButtons(
+                primaryLabel: "Inserir código do boleto",
+                primaryOnPressed: () {
+                  //controller.status = BarcodeScannerStatus.error("Error");
+                },
+                secondaryLabel: "Adicionar da galeria",
+                secondaryOnPressed: () {},
+              ),
+            ),
           ),
-        ),
+          ValueListenableBuilder<BarcodeScannerStatus>(
+            valueListenable: controller.statusNotifier,
+            builder: (_, status, __) {
+              if (status.hasError)
+                return BottomSheetWidget(
+                    primaryLabel: "Escanear novamente",
+                    primaryOnPressed: () {
+                      controller.scanWithCamera();
+                    },
+                    secondaryLabel: "Digitar código",
+                    secondaryOnPressed: () {},
+                    title: "Não foi possivel ler um código de barras.",
+                    subtitle: "Tente novamente ou digite o código.");
+              else
+                return Container();
+            },
+          ),
+        ],
       ),
     );
   }
