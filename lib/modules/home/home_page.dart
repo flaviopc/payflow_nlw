@@ -57,6 +57,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
+      body: pages[homeController.currentPage],
       bottomNavigationBar: Container(
         height: 60,
         child: Row(
@@ -71,16 +72,17 @@ class _HomePageState extends State<HomePage> {
               color: AppColors.primary,
             ),
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                Navigator.pushNamed(context, "/barcode_scanner");
+              },
               child: Container(
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
                     color: AppColors.primary,
                     borderRadius: BorderRadius.circular(5)),
-                child: IconButton(
-                  onPressed: () {},
-                  icon: Icon(Icons.add_box_outlined),
+                child: Icon(
+                  Icons.add_box_outlined,
                   color: AppColors.background,
                 ),
               ),
