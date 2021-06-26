@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:payflow/modules/boletos/insert_boleto/insert_boleto_controller.dart';
@@ -8,8 +9,7 @@ import 'package:payflow/shared/widgets/input_text/input_text_widget.dart';
 import 'package:payflow/shared/widgets/set_label_buttons/set_label_buttons.dart';
 
 class InsertBoletoPage extends StatefulWidget {
-  final String? barcode;
-  const InsertBoletoPage({Key? key, this.barcode}) : super(key: key);
+  const InsertBoletoPage({Key? key}) : super(key: key);
 
   @override
   _InsertBoletoPageState createState() => _InsertBoletoPageState();
@@ -17,9 +17,6 @@ class InsertBoletoPage extends StatefulWidget {
 
 class _InsertBoletoPageState extends State<InsertBoletoPage> {
   final controller = InsertBoletoController();
-  // final moneyInputTextController =
-  //     MoneyMaskedTextController(leftSymbol: "R\$", decimalSeparator: ",");
-  // final dueDateInputTextController = MaskedTextController(mask: "00/00/0000");
   final barcodeInputTextController = MaskedTextController(mask: "00000.00000");
   final barcodeInputTextController2 =
       MaskedTextController(mask: "00000.000000");
@@ -33,17 +30,81 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
 
   @override
   void initState() {
-    // if (widget.barcode != null) {
-    //   barcodeInputTextController.text = widget.barcode!;
-    // }
-
-    // barcodeInputTextController.addListener(_campo1);
-    // barcodeInputTextController2.addListener(_campo2);
-    // barcodeInputTextController3.addListener(_campo3);
-    // barcodeInputTextController4.addListener(_campo4);
+    barcodeInputTextController.addListener(_campo1);
+    barcodeInputTextController2.addListener(_campo2);
+    barcodeInputTextController3.addListener(_campo3);
+    barcodeInputTextController4.addListener(_campo4);
     // barcodeInputTextController5.addListener(_campo5);
 
     super.initState();
+  }
+
+  Future<String?> _getClipBoardText() async {
+    ClipboardData? dados = await Clipboard.getData(Clipboard.kTextPlain);
+    return dados?.text;
+  }
+
+  void _colarCodigo() async {
+    String? dados = await _getClipBoardText();
+    if (dados!.isNotEmpty) {
+      if (dados.length == 47 || dados.length == 44) {
+        controller.codigoBoleto = dados;
+        var codigoDividido = controller.divideCodigo();
+        controller.getDataVencimento();
+        setState(() {
+          controller.visivel[0] = true;
+          controller.visivel[1] = true;
+          controller.visivel[2] = true;
+          controller.visivel[3] = true;
+
+          setCodigos(codigoDividido);
+        });
+      } else {
+        print("Código do boleto é inválido");
+      }
+    } else {
+      print("Boleto inválido");
+    }
+  }
+
+  void setCodigos(List<String> codigoDividido) {
+    barcodeInputTextController.text = codigoDividido[0];
+    barcodeInputTextController2.text = codigoDividido[1];
+    barcodeInputTextController3.text = codigoDividido[2];
+    barcodeInputTextController4.text = codigoDividido[3];
+    barcodeInputTextController5.text = codigoDividido[4];
+  }
+
+  void _campo1() {
+    if (barcodeInputTextController.text.length == 11) {
+      controller.visivel[0] = true;
+      setState(() {});
+      _focusNodes[0].requestFocus();
+    }
+  }
+
+  void _campo2() {
+    if (barcodeInputTextController2.text.length == 12) {
+      controller.visivel[1] = true;
+      setState(() {});
+      _focusNodes[1].requestFocus();
+    }
+  }
+
+  void _campo3() {
+    if (barcodeInputTextController3.text.length == 12) {
+      controller.visivel[2] = true;
+      setState(() {});
+      _focusNodes[2].requestFocus();
+    }
+  }
+
+  void _campo4() {
+    if (barcodeInputTextController4.text.length == 1) {
+      controller.visivel[3] = true;
+      setState(() {});
+      _focusNodes[3].requestFocus();
+    }
   }
 
   @override
@@ -71,6 +132,27 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
                   textAlign: TextAlign.center,
                 ),
               ),
+              GestureDetector(
+                onTap: () {
+                  _colarCodigo();
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.paste,
+                        color: AppColors.primary,
+                      ),
+                      Text(
+                        "colar código",
+                        style: TextStyles.buttonPrimary,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               SizedBox(
                 height: 24,
               ),
@@ -83,13 +165,7 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
                       controller: barcodeInputTextController,
                       label: "1ª parte do Código",
                       icon: FontAwesomeIcons.barcode,
-                      onChanged: (v) {
-                        if (v.length == 11) {
-                          controller.visivel[0] = true;
-                          setState(() {});
-                          _focusNodes[0].requestFocus();
-                        }
-                      }, //(v) => controller.onChange(barcode: v),
+                      onChanged: (v) {},
                       validator: controller.validateCodigo,
                     ),
                     Visibility(
@@ -100,13 +176,7 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
                         controller: barcodeInputTextController2,
                         label: "2ª parte",
                         icon: FontAwesomeIcons.barcode,
-                        onChanged: (v) {
-                          if (v.length == 12) {
-                            controller.visivel[1] = true;
-                            setState(() {});
-                            _focusNodes[1].requestFocus();
-                          }
-                        },
+                        onChanged: (v) {},
                         validator: controller.validateCodigo,
                       ),
                     ),
@@ -118,13 +188,7 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
                         controller: barcodeInputTextController3,
                         label: "3ª parte",
                         icon: FontAwesomeIcons.barcode,
-                        onChanged: (v) {
-                          if (v.length == 12) {
-                            controller.visivel[2] = true;
-                            setState(() {});
-                            _focusNodes[2].requestFocus();
-                          }
-                        },
+                        onChanged: (v) {},
                         validator: controller.validateCodigo,
                       ),
                     ),
@@ -136,13 +200,7 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
                         controller: barcodeInputTextController4,
                         label: "4ª parte (Dígito Verificador)",
                         icon: FontAwesomeIcons.barcode,
-                        onChanged: (v) {
-                          if (v.length == 1) {
-                            controller.visivel[3] = true;
-                            setState(() {});
-                            _focusNodes[3].requestFocus();
-                          }
-                        },
+                        onChanged: (v) {},
                         validator: controller.validateCodigo,
                       ),
                     ),
@@ -154,7 +212,7 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
                         controller: barcodeInputTextController5,
                         label: "5ª e última parte",
                         icon: FontAwesomeIcons.barcode,
-                        onChanged: (v) => controller.onChange(barcode: v),
+                        onChanged: (v) {},
                         validator: controller.validateCodigo,
                       ),
                     ),
@@ -171,10 +229,13 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
         primaryOnPressed: () {
           Navigator.pop(context);
         },
-        secondaryLabel: "Cadastrar",
-        secondaryOnPressed: () async {
-          await controller.cadastrarBoleto();
-          Navigator.pop(context);
+        secondaryLabel: "Próximo",
+        secondaryOnPressed: () {
+          if (controller.codigoBoleto.isNotEmpty)
+            Navigator.pushNamed(context, "/confirma_boleto",
+                arguments: controller.codigoBoleto);
+          else
+            print("código invalido");
         },
       ),
     );

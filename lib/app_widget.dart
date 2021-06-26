@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:payflow/modules/barcode_scanner/barcode_scanner_page.dart';
+import 'package:payflow/modules/boletos/insert_boleto/confirmacao_boleto_page.dart';
 import 'package:payflow/modules/boletos/insert_boleto/insert_boleto_page.dart';
 import 'package:payflow/modules/home/home_page.dart';
 import 'package:payflow/modules/login/login_page.dart';
@@ -33,7 +34,8 @@ class AppWidget extends StatelessWidget {
             ),
         "/login": (context) => LoginPage(),
         "/barcode_scanner": (context) => BarcodeScannerPage(),
-        "/insert_boleto": (context) => InsertBoletoPage(
+        "/insert_boleto": (context) => InsertBoletoPage(),
+        "/confirma_boleto": (context) => ConfirmacaoBoletoPage(
               barcode: ModalRoute.of(context) != null
                   ? ModalRoute.of(context)!.settings.arguments.toString()
                   : "",

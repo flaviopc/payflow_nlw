@@ -35,6 +35,7 @@ class InputTextWidget extends StatelessWidget {
         child: Column(
           children: [
             TextFormField(
+              maxLines: 2,
               focusNode: focusNode,
               keyboardType:
                   typeNumeric ? TextInputType.number : TextInputType.text,

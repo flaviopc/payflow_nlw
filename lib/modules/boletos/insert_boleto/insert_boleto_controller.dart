@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:payflow/shared/models/boleto_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class InsertBoletoController {
   final formKey = GlobalKey<FormState>();
   BoletoModel model = BoletoModel();
+  //visibilidade dos campos
+  var visivel = [false, false, false, false];
+  late String codigoBoleto;
+  var codigoDividido = List<String>.generate(5, (i) => "");
+  final dataBase = "1997-10-07";
+  final formatoData = "dd/MM/yyyy";
+  final formatoMoeda = "########,##";
 
   String? validateName(String? value) =>
       value?.isEmpty ?? true ? "O nome não pode ser vazio" : null;
@@ -15,16 +23,51 @@ class InsertBoletoController {
   String? validateCodigo(String? value) =>
       value?.isEmpty ?? true ? "O código não pode ser vazio" : null;
 
-  var visivel = [false, false, false, false];
-
   void alteraVisibilidade(int n) {
     visivel[n] = !visivel[n];
+  }
+
+  String getDataVencimento() {
+    String codigo =
+        codigoBoleto.length == 47 ? divideCodigo()[4] : divideCodigo()[1];
+    String dias = codigo.substring(0, 4);
+    DateTime vencimento =
+        DateUtils.addDaysToDate(DateTime.parse(dataBase), int.parse(dias));
+
+    return DateFormat(formatoData).format(vencimento);
+  }
+
+  String getValor() {
+    String codigo =
+        codigoBoleto.length == 47 ? divideCodigo()[4] : divideCodigo()[1];
+    String valor = codigo.substring(4);
+    return NumberFormat("########,##").format(int.parse(valor));
+  }
+
+  List<String> divideCodigo() {
+    var codigo = List<String>.generate(5, (i) => "");
+
+    if (codigoBoleto.length == 47) {
+      codigo[0] = codigoBoleto.substring(0, 10);
+      codigo[1] = codigoBoleto.substring(10, 21);
+      codigo[2] = codigoBoleto.substring(21, 32);
+      codigo[3] = codigoBoleto.substring(32, 33);
+      codigo[4] = codigoBoleto.substring(33);
+    } else {
+      codigo[0] = codigoBoleto.substring(0, 5);
+      codigo[1] = codigoBoleto.substring(5, 19);
+      codigo[2] = codigoBoleto.substring(19, 24);
+      codigo[3] = codigoBoleto.substring(24, 30);
+      codigo[4] = codigoBoleto.substring(30);
+    }
+    return codigo;
   }
 
   Future<void> cadastrarBoleto() async {
     final form = formKey.currentState;
     if (form!.validate()) {
-      return await saveBoleto();
+      return;
+      // await saveBoleto();
     }
   }
 
