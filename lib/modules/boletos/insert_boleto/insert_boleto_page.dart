@@ -166,7 +166,7 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
                       label: "1ª parte do Código",
                       icon: FontAwesomeIcons.barcode,
                       onChanged: (v) {},
-                      validator: controller.validateCodigo,
+                      validator: controller.validaCampo1,
                     ),
                     Visibility(
                       visible: controller.visivel[0],
@@ -177,7 +177,7 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
                         label: "2ª parte",
                         icon: FontAwesomeIcons.barcode,
                         onChanged: (v) {},
-                        validator: controller.validateCodigo,
+                        validator: controller.validaCampo2e3,
                       ),
                     ),
                     Visibility(
@@ -189,7 +189,7 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
                         label: "3ª parte",
                         icon: FontAwesomeIcons.barcode,
                         onChanged: (v) {},
-                        validator: controller.validateCodigo,
+                        validator: controller.validaCampo2e3,
                       ),
                     ),
                     Visibility(
@@ -201,7 +201,7 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
                         label: "4ª parte (Dígito Verificador)",
                         icon: FontAwesomeIcons.barcode,
                         onChanged: (v) {},
-                        validator: controller.validateCodigo,
+                        validator: controller.validaCampo4,
                       ),
                     ),
                     Visibility(
@@ -213,7 +213,7 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
                         label: "5ª e última parte",
                         icon: FontAwesomeIcons.barcode,
                         onChanged: (v) {},
-                        validator: controller.validateCodigo,
+                        validator: controller.validaCampo5,
                       ),
                     ),
                   ],
@@ -231,11 +231,16 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
         },
         secondaryLabel: "Próximo",
         secondaryOnPressed: () {
-          if (controller.codigoBoleto.isNotEmpty)
-            Navigator.pushNamed(context, "/confirma_boleto",
-                arguments: controller.codigoBoleto);
-          else
-            print("código invalido");
+          if (controller.formKey.currentState!.validate()) {
+            if (controller.codigoBoleto.isNotEmpty) {
+              Navigator.pushNamed(context, "/confirma_boleto",
+                  arguments: controller.codigoBoleto);
+            } else {
+              print("código invalido");
+            }
+          } else {
+            print("erro no form");
+          }
         },
       ),
     );

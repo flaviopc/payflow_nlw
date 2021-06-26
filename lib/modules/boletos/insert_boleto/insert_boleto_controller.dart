@@ -20,8 +20,36 @@ class InsertBoletoController {
       value?.isEmpty ?? true ? "A data de vencimento não pode ser vazia" : null;
   String? validateValor(double? value) =>
       value == 0 ? "Insira um valor maior que R\$ 0,00" : null;
-  String? validateCodigo(String? value) =>
-      value?.isEmpty ?? true ? "O código não pode ser vazio" : null;
+
+  String? validaCampo1(String? value) {
+    if (value!.isEmpty)
+      return "O código não pode ser vazio";
+    else if (value.length < 11)
+      return "O código está incompleto";
+    else
+      return null;
+  }
+
+  String? validaCampo2e3(String? value) {
+    if (value!.isEmpty)
+      return "O código não pode ser vazio";
+    else if (value.length < 12)
+      return "O código está incompleto";
+    else
+      return null;
+  }
+
+  String? validaCampo4(String? value) =>
+      value!.isEmpty ? "O código não pode ser vazio" : null;
+
+  String? validaCampo5(String? value) {
+    if (value!.isEmpty)
+      return "O código não pode ser vazio";
+    else if (value.length < 14)
+      return "O código está incompleto";
+    else
+      return null;
+  }
 
   void alteraVisibilidade(int n) {
     visivel[n] = !visivel[n];
@@ -41,7 +69,7 @@ class InsertBoletoController {
     String codigo =
         codigoBoleto.length == 47 ? divideCodigo()[4] : divideCodigo()[1];
     String valor = codigo.substring(4);
-    return NumberFormat("########,##").format(int.parse(valor));
+    return NumberFormat(formatoMoeda).format(int.parse(valor));
   }
 
   List<String> divideCodigo() {

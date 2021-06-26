@@ -13,6 +13,7 @@ class InputTextWidget extends StatelessWidget {
   final TextEditingController? controller;
   final void Function(String value) onChanged;
   final FocusNode? focusNode;
+  final bool habilitado;
 
   const InputTextWidget({
     Key? key,
@@ -24,6 +25,7 @@ class InputTextWidget extends StatelessWidget {
     required this.onChanged,
     this.typeNumeric = false,
     this.focusNode,
+    this.habilitado = true,
   }) : super(key: key);
 
   @override
@@ -35,6 +37,7 @@ class InputTextWidget extends StatelessWidget {
         child: Column(
           children: [
             TextFormField(
+              enabled: habilitado,
               maxLines: 2,
               focusNode: focusNode,
               keyboardType:

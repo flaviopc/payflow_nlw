@@ -74,13 +74,15 @@ class _ConfirmacaoBoletoPageState extends State<ConfirmacaoBoletoPage> {
                 child: Column(
                   children: [
                     InputTextWidget(
+                      habilitado: false,
                       controller: barcodeInputTextController,
                       label: "Código",
                       icon: FontAwesomeIcons.barcode,
                       onChanged: (v) => controller.onChange(barcode: v),
-                      validator: controller.validateCodigo,
+                      validator: controller.validaCampo1,
                     ),
                     InputTextWidget(
+                      habilitado: false,
                       controller: dueDateInputTextController,
                       label: "Vencimento",
                       icon: FontAwesomeIcons.calendarCheck,
@@ -88,6 +90,7 @@ class _ConfirmacaoBoletoPageState extends State<ConfirmacaoBoletoPage> {
                       validator: controller.validateVencimento,
                     ),
                     InputTextWidget(
+                      habilitado: false,
                       controller: moneyInputTextController,
                       label: "Valor",
                       icon: FontAwesomeIcons.wallet,
