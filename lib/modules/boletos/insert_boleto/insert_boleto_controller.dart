@@ -15,6 +15,12 @@ class InsertBoletoController {
   String? validateCodigo(String? value) =>
       value?.isEmpty ?? true ? "O código não pode ser vazio" : null;
 
+  var visivel = [false, false, false, false];
+
+  void alteraVisibilidade(int n) {
+    visivel[n] = !visivel[n];
+  }
+
   Future<void> cadastrarBoleto() async {
     final form = formKey.currentState;
     if (form!.validate()) {

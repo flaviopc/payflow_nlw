@@ -6,11 +6,13 @@ import 'package:payflow/shared/themes/app_text_styles.dart';
 
 class InputTextWidget extends StatelessWidget {
   final String label;
+  final bool typeNumeric;
   final IconData icon;
   final String? initialValue;
   final String? Function(String?)? validator;
   final TextEditingController? controller;
   final void Function(String value) onChanged;
+  final FocusNode? focusNode;
 
   const InputTextWidget({
     Key? key,
@@ -20,6 +22,8 @@ class InputTextWidget extends StatelessWidget {
     this.validator,
     this.controller,
     required this.onChanged,
+    this.typeNumeric = false,
+    this.focusNode,
   }) : super(key: key);
 
   @override
@@ -31,6 +35,9 @@ class InputTextWidget extends StatelessWidget {
         child: Column(
           children: [
             TextFormField(
+              focusNode: focusNode,
+              keyboardType:
+                  typeNumeric ? TextInputType.number : TextInputType.text,
               controller: controller,
               onChanged: onChanged,
               initialValue: initialValue,
