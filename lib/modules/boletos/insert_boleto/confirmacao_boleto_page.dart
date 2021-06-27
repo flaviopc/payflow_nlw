@@ -33,11 +33,20 @@ class _ConfirmacaoBoletoPageState extends State<ConfirmacaoBoletoPage> {
 
   @override
   void initState() {
-    if (widget.barcode != null) {
+    if (widget.barcode != null && widget.barcode!.length == 44 ||
+        widget.barcode!.length == 47) {
       controller.codigoBoleto = widget.barcode!;
-      setDadosBoleto();
-    }
 
+      setState(() {
+        setDadosBoleto();
+      });
+
+      controller.onChange(
+        barcode: barcodeInputTextController.text,
+        value: moneyInputTextController.numberValue,
+        dueDate: dueDateInputTextController.text,
+      );
+    }
     super.initState();
   }
 
@@ -54,7 +63,7 @@ class _ConfirmacaoBoletoPageState extends State<ConfirmacaoBoletoPage> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -119,8 +128,10 @@ class _ConfirmacaoBoletoPageState extends State<ConfirmacaoBoletoPage> {
           },
           secondaryLabel: "Cadastrar",
           secondaryOnPressed: () async {
-            await controller.cadastrarBoleto();
-            Navigator.pop(context);
+            if (controller.formKey.currentState!.validate()) {
+              await controller.cadastrarBoleto();
+              Navigator.popUntil(context, ModalRoute.withName("/home"));
+            }
           }),
     );
   }

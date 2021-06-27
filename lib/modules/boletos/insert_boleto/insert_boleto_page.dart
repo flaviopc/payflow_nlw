@@ -17,6 +17,7 @@ class InsertBoletoPage extends StatefulWidget {
 
 class _InsertBoletoPageState extends State<InsertBoletoPage> {
   final controller = InsertBoletoController();
+
   final barcodeInputTextController = MaskedTextController(mask: "00000.00000");
   final barcodeInputTextController2 =
       MaskedTextController(mask: "00000.000000");
@@ -30,12 +31,6 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
 
   @override
   void initState() {
-    barcodeInputTextController.addListener(_campo1);
-    barcodeInputTextController2.addListener(_campo2);
-    barcodeInputTextController3.addListener(_campo3);
-    barcodeInputTextController4.addListener(_campo4);
-    // barcodeInputTextController5.addListener(_campo5);
-
     super.initState();
   }
 
@@ -60,11 +55,31 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
           setCodigos(codigoDividido);
         });
       } else {
-        print("Código do boleto é inválido");
+        msgErroBoleto();
       }
     } else {
       print("Boleto inválido");
     }
+  }
+
+  void goToConfirmacao(BuildContext context) {
+    if (controller.codigoBoleto.isNotEmpty) {
+      Navigator.pushNamed(context, "/confirma_boleto",
+          arguments: controller.codigoBoleto);
+    } else {
+      msgErroBoleto();
+    }
+  }
+
+  void msgErroBoleto() {
+    ScaffoldMessenger.of(context)
+      ..removeCurrentSnackBar()
+      ..showSnackBar(
+        const SnackBar(
+          elevation: 4,
+          content: Text("Código do boleto é inválido"),
+        ),
+      );
   }
 
   void setCodigos(List<String> codigoDividido) {
@@ -75,35 +90,50 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
     barcodeInputTextController5.text = codigoDividido[4];
   }
 
-  void _campo1() {
-    if (barcodeInputTextController.text.length == 11) {
+  void _campo1(String v) {
+    if (v.length == 11) {
       controller.visivel[0] = true;
       setState(() {});
       _focusNodes[0].requestFocus();
     }
   }
 
-  void _campo2() {
-    if (barcodeInputTextController2.text.length == 12) {
+  void _campo2(String v) {
+    if (v.length == 12) {
       controller.visivel[1] = true;
       setState(() {});
       _focusNodes[1].requestFocus();
     }
   }
 
-  void _campo3() {
-    if (barcodeInputTextController3.text.length == 12) {
+  void _campo3(String v) {
+    if (v.length == 12) {
       controller.visivel[2] = true;
       setState(() {});
       _focusNodes[2].requestFocus();
     }
   }
 
-  void _campo4() {
-    if (barcodeInputTextController4.text.length == 1) {
+  void _campo4(String v) {
+    if (v.length == 1) {
       controller.visivel[3] = true;
       setState(() {});
       _focusNodes[3].requestFocus();
+    }
+  }
+
+  void _campo5(String v) {
+    if (v.length == 14) {
+      controller.codigoBoleto = barcodeInputTextController.text +
+          barcodeInputTextController2.text +
+          barcodeInputTextController3.text +
+          barcodeInputTextController4.text +
+          barcodeInputTextController5.text;
+      if (controller.formKey.currentState!.validate()) {
+        goToConfirmacao(context);
+      } else {
+        print("erro no form");
+      }
     }
   }
 
@@ -120,7 +150,7 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -165,7 +195,9 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
                       controller: barcodeInputTextController,
                       label: "1ª parte do Código",
                       icon: FontAwesomeIcons.barcode,
-                      onChanged: (v) {},
+                      onChanged: (v) {
+                        _campo1(v);
+                      },
                       validator: controller.validaCampo1,
                     ),
                     Visibility(
@@ -176,7 +208,9 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
                         controller: barcodeInputTextController2,
                         label: "2ª parte",
                         icon: FontAwesomeIcons.barcode,
-                        onChanged: (v) {},
+                        onChanged: (v) {
+                          _campo2(v);
+                        },
                         validator: controller.validaCampo2e3,
                       ),
                     ),
@@ -188,7 +222,9 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
                         controller: barcodeInputTextController3,
                         label: "3ª parte",
                         icon: FontAwesomeIcons.barcode,
-                        onChanged: (v) {},
+                        onChanged: (v) {
+                          _campo3(v);
+                        },
                         validator: controller.validaCampo2e3,
                       ),
                     ),
@@ -200,7 +236,9 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
                         controller: barcodeInputTextController4,
                         label: "4ª parte (Dígito Verificador)",
                         icon: FontAwesomeIcons.barcode,
-                        onChanged: (v) {},
+                        onChanged: (v) {
+                          _campo4(v);
+                        },
                         validator: controller.validaCampo4,
                       ),
                     ),
@@ -212,7 +250,9 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
                         controller: barcodeInputTextController5,
                         label: "5ª e última parte",
                         icon: FontAwesomeIcons.barcode,
-                        onChanged: (v) {},
+                        onChanged: (v) {
+                          _campo5(v);
+                        },
                         validator: controller.validaCampo5,
                       ),
                     ),
@@ -232,12 +272,7 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
         secondaryLabel: "Próximo",
         secondaryOnPressed: () {
           if (controller.formKey.currentState!.validate()) {
-            if (controller.codigoBoleto.isNotEmpty) {
-              Navigator.pushNamed(context, "/confirma_boleto",
-                  arguments: controller.codigoBoleto);
-            } else {
-              print("código invalido");
-            }
+            goToConfirmacao(context);
           } else {
             print("erro no form");
           }

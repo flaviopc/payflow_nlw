@@ -8,7 +8,9 @@ class InsertBoletoController {
   BoletoModel model = BoletoModel();
   //visibilidade dos campos
   var visivel = [false, false, false, false];
-  late String codigoBoleto;
+  String? _codigoBoleto;
+  String get codigoBoleto => _codigoBoleto!;
+  set codigoBoleto(String v) => _codigoBoleto = v.replaceAll(".", "");
   var codigoDividido = List<String>.generate(5, (i) => "");
   final dataBase = "1997-10-07";
   final formatoData = "dd/MM/yyyy";
@@ -94,8 +96,7 @@ class InsertBoletoController {
   Future<void> cadastrarBoleto() async {
     final form = formKey.currentState;
     if (form!.validate()) {
-      return;
-      // await saveBoleto();
+      return await saveBoleto();
     }
   }
 
