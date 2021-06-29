@@ -6,10 +6,13 @@ O PayFlow é um app mobile feito em Flutter para Gerenciamento de Boletos, conte
 
 ## Features adicionadas
 
-Preechimento automático dos dados do boleto através do código;
-Possibilidade de colar um código de boleto copiado anteriormente;
-Validação do código do boleto;
-Inserção do código do boleto por etapas;
+Preechimento automático dos dados do boleto através do código
+
+Possibilidade de colar um código de boleto copiado anteriormente
+
+Validação do código do boleto
+
+Inserção do código do boleto por etapas
 
 ## Getting Started
 

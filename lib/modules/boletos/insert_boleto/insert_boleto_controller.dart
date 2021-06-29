@@ -102,9 +102,9 @@ class InsertBoletoController {
 
   Future<void> saveBoleto() async {
     final instance = await SharedPreferences.getInstance();
-    final boletos = instance.getStringList("boletos") ?? <String>[];
+    final boletos = instance.getStringList("boletos1") ?? <String>[];
     boletos.add(model.toJson());
-    await instance.setStringList("boletos", boletos);
+    await instance.setStringList("boletos1", boletos);
     return;
   }
 

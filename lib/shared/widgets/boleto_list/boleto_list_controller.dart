@@ -14,7 +14,7 @@ class BoletoListController {
   Future<void> getBoletos() async {
     try {
       final instance = await SharedPreferences.getInstance();
-      final response = instance.getStringList("boletos") ?? <String>[];
+      final response = instance.getStringList("boletos1") ?? <String>[];
       boletos = response.map((e) => BoletoModel.fromJson(e)).toList();
     } catch (e) {
       boletos = <BoletoModel>[];
