@@ -83,8 +83,18 @@ class _HomePageState extends State<HomePage> {
             ),
             GestureDetector(
               onTap: () async {
-                await Navigator.pushNamed(context, "/barcode_scanner");
-                setState(() {});
+                final result =
+                    await Navigator.pushNamed(context, "/barcode_scanner");
+                if (result == true) {
+                  ScaffoldMessenger.of(context)
+                    ..removeCurrentSnackBar()
+                    ..showSnackBar(
+                      const SnackBar(
+                        elevation: 4,
+                        content: Text("O código do boleto é inválido"),
+                      ),
+                    );
+                }
               },
               child: Container(
                 width: 50,

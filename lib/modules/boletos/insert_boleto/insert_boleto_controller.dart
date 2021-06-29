@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:payflow/shared/models/boleto_model.dart';
+import 'package:payflow/shared/utils/boleto/boleto_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class InsertBoletoController {
   final formKey = GlobalKey<FormState>();
   BoletoModel model = BoletoModel();
   //visibilidade dos campos
-  var visivel = [false, false, false, false];
+  List<bool> _campoVisivel = [false, false, false, false];
+  bool isVisivel(int index) => _campoVisivel[index];
+  set campoVisivel(int index) => _campoVisivel[index] = true;
+  void allCampoVisivel() =>
+      _campoVisivel = _campoVisivel.map((e) => e = true).toList();
+
   String? _codigoBoleto;
   String get codigoBoleto => _codigoBoleto!;
-  set codigoBoleto(String v) => _codigoBoleto = v.replaceAll(".", "");
+  set codigoBoleto(String v) =>
+      _codigoBoleto = v.replaceAll(".", "").replaceAll("-", "");
+
   var codigoDividido = List<String>.generate(5, (i) => "");
-  final dataBase = "1997-10-07";
-  final formatoData = "dd/MM/yyyy";
-  final formatoMoeda = "########,##";
 
   String? validateName(String? value) =>
       value?.isEmpty ?? true ? "O nome não pode ser vazio" : null;
@@ -53,25 +58,32 @@ class InsertBoletoController {
       return null;
   }
 
-  void alteraVisibilidade(int n) {
-    visivel[n] = !visivel[n];
-  }
-
   String getDataVencimento() {
     String codigo =
         codigoBoleto.length == 47 ? divideCodigo()[4] : divideCodigo()[1];
     String dias = codigo.substring(0, 4);
-    DateTime vencimento =
-        DateUtils.addDaysToDate(DateTime.parse(dataBase), int.parse(dias));
+    DateTime vencimento = DateUtils.addDaysToDate(
+        DateTime.parse(BoletoUtils.DATA_BASE), int.parse(dias));
 
-    return DateFormat(formatoData).format(vencimento);
+    return DateFormat(BoletoUtils.FORMAT_DATA).format(vencimento);
   }
 
   String getValor() {
     String codigo =
         codigoBoleto.length == 47 ? divideCodigo()[4] : divideCodigo()[1];
     String valor = codigo.substring(4);
-    return NumberFormat(formatoMoeda).format(int.parse(valor));
+    return NumberFormat(BoletoUtils.FORMAT_VALOR).format(int.parse(valor));
+  }
+
+  void msgErroBoleto(BuildContext context) {
+    ScaffoldMessenger.of(context)
+      ..removeCurrentSnackBar()
+      ..showSnackBar(
+        const SnackBar(
+          elevation: 4,
+          content: Text("O código do boleto é inválido"),
+        ),
+      );
   }
 
   List<String> divideCodigo() {

@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:payflow/modules/boletos/insert_boleto/insert_boleto_controller.dart';
 import 'package:payflow/shared/themes/app_colors.dart';
 import 'package:payflow/shared/themes/app_text_styles.dart';
+import 'package:payflow/shared/utils/boleto/boleto_utils.dart';
 import 'package:payflow/shared/widgets/input_text/input_text_widget.dart';
 import 'package:payflow/shared/widgets/set_label_buttons/set_label_buttons.dart';
 
@@ -19,9 +20,10 @@ class ConfirmacaoBoletoPage extends StatefulWidget {
 class _ConfirmacaoBoletoPageState extends State<ConfirmacaoBoletoPage> {
   final controller = InsertBoletoController();
   final moneyInputTextController = MoneyMaskedTextController(leftSymbol: "R\$");
-  final dueDateInputTextController = MaskedTextController(mask: "00/00/0000");
-  final barcodeInputTextController = MaskedTextController(
-      mask: "00000.00000 00000.000000\n00000.000000 0 00000000000000");
+  final dueDateInputTextController =
+      MaskedTextController(mask: BoletoUtils.MASK_DATA);
+  final barcodeInputTextController =
+      MaskedTextController(mask: BoletoUtils.FORMAT_BOLETO);
 
   void setDadosBoleto() {
     String data = controller.getDataVencimento();
@@ -33,8 +35,10 @@ class _ConfirmacaoBoletoPageState extends State<ConfirmacaoBoletoPage> {
 
   @override
   void initState() {
-    if (widget.barcode != null && widget.barcode!.length == 44 ||
-        widget.barcode!.length == 47) {
+    if (widget.barcode != null &&
+        (widget.barcode!.length == 44 ||
+            widget.barcode!.length == 47 ||
+            widget.barcode!.length == 48)) {
       controller.codigoBoleto = widget.barcode!;
 
       setState(() {
