@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:payflow/modules/boletos/insert_boleto/boleto.dart';
 import 'package:payflow/modules/boletos/insert_boleto/insert_boleto_controller.dart';
 import 'package:payflow/shared/themes/app_colors.dart';
 import 'package:payflow/shared/themes/app_text_styles.dart';
@@ -18,14 +19,10 @@ class InsertBoletoPage extends StatefulWidget {
 
 class _InsertBoletoPageState extends State<InsertBoletoPage> {
   final controller = InsertBoletoController();
-
-  final List<MaskedTextController> barcodeInputTextController = [
-    MaskedTextController(mask: "00000.00000"),
-    MaskedTextController(mask: "00000.000000"),
-    MaskedTextController(mask: "00000.000000"),
-    MaskedTextController(mask: "0"),
-    MaskedTextController(mask: "00000000000000")
-  ];
+  Boleto boleto = Boleto();
+  bool concessionaria = false;
+  List<MaskedTextController> barcodeInputTextController =
+      BoletoUtils.maskBarcode(0);
 
   var _focusNodes = List.generate(5, (index) => FocusNode());
 
@@ -43,11 +40,12 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
 
   void _colarCodigo() async {
     String dados = await _getClipBoardText();
-    if (RegExp(BoletoUtils.REGEXP_BOLETO).hasMatch(dados)) {
-      controller.codigoBoleto = dados;
-      var codigoDividido = controller.divideCodigo();
-      controller.getDataVencimento();
-      controller.allCampoVisivel();
+    if (RegExp(BoletoUtils.REGEXP_BOLETO).hasMatch(dados) ||
+        RegExp(BoletoUtils.REGEXP_BARCODE).hasMatch(dados) ||
+        RegExp(BoletoUtils.REGEXP_CONCESSIONARIA).hasMatch(dados)) {
+      controller.boleto.codigoBoleto = dados;
+      var codigoDividido = controller.boleto.divideCodigo();
+      controller.boleto.allCampoVisivel();
       setCodigos(codigoDividido);
       goToConfirmacao(context);
     } else {
@@ -59,7 +57,7 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
   void goToConfirmacao(BuildContext context) {
     if (controller.formKey.currentState!.validate()) {
       Navigator.pushNamed(context, "/confirma_boleto",
-          arguments: controller.codigoBoleto);
+          arguments: controller.boleto.codigoBoleto);
     } else {
       controller.msgErroBoleto(context);
     }
@@ -70,51 +68,82 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
     barcodeInputTextController[1].text = codigoDividido[1];
     barcodeInputTextController[2].text = codigoDividido[2];
     barcodeInputTextController[3].text = codigoDividido[3];
-    barcodeInputTextController[4].text = codigoDividido[4];
+    if (!controller.boleto.eBoletoNormal)
+      barcodeInputTextController[4].text = codigoDividido[4];
+  }
+
+  void _proxCampo(int index) {
+    controller.boleto.campoVisivel = index;
+    setState(() {});
+    _focusNodes[index + 1].requestFocus();
   }
 
   void _campo1(String v) {
-    if (v.length == 11) {
-      controller.campoVisivel = 0;
+    String txt = "";
+    if (v.length == 2) {
+      txt = barcodeInputTextController[0].text;
+      if (v.startsWith(BoletoUtils.E_CONCESSIONARIA)) {
+        concessionaria = true;
+        barcodeInputTextController = BoletoUtils.maskBarcode(1);
+      } else {
+        barcodeInputTextController = BoletoUtils.maskBarcode(0);
+      }
       setState(() {});
-      _focusNodes[1].requestFocus();
+      barcodeInputTextController[0].text = txt;
+    }
+
+    if (!v.startsWith(BoletoUtils.E_CONCESSIONARIA)) {
+      if (v.length == 11) {
+        _proxCampo(0);
+      }
+    } else {
+      if (v.length == 12) {
+        _proxCampo(0);
+      }
     }
   }
 
   void _campo2(String v) {
     if (v.length == 12) {
-      controller.campoVisivel = 1;
-      setState(() {});
-      _focusNodes[2].requestFocus();
+      _proxCampo(1);
     }
   }
 
   void _campo3(String v) {
     if (v.length == 12) {
-      controller.campoVisivel = 2;
-      setState(() {});
-      _focusNodes[3].requestFocus();
+      _proxCampo(2);
     }
   }
 
   void _campo4(String v) {
-    if (v.length == 1) {
-      controller.campoVisivel = 3;
-      setState(() {});
-      _focusNodes[4].requestFocus();
+    if (!concessionaria) {
+      if (v.length == 1) {
+        _proxCampo(3);
+      }
+    } else {
+      if (v.length == 12) {
+        _juntaCodigos();
+        goToConfirmacao(context);
+      }
     }
   }
 
   void _campo5(String v) {
     if (v.length == 14) {
-      controller.codigoBoleto = barcodeInputTextController[0].text +
-          barcodeInputTextController[1].text +
-          barcodeInputTextController[2].text +
-          barcodeInputTextController[3].text +
-          barcodeInputTextController[4].text;
-
+      _juntaCodigos();
       goToConfirmacao(context);
     }
+  }
+
+  void _juntaCodigos() {
+    controller.boleto.codigoBoleto = barcodeInputTextController[0].text +
+        barcodeInputTextController[1].text +
+        barcodeInputTextController[2].text +
+        barcodeInputTextController[3].text;
+
+    if (controller.boleto.eBoletoNormal)
+      controller.boleto.codigoBoleto =
+          controller.boleto.codigoBoleto + barcodeInputTextController[4].text;
   }
 
   @override
@@ -171,10 +200,10 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
                       onChanged: (v) {
                         _campo1(v);
                       },
-                      validator: controller.validaCampo1,
+                      validator: controller.boleto.validaCampo1,
                     ),
                     Visibility(
-                      visible: controller.isVisivel(0),
+                      visible: controller.boleto.isVisivel(0),
                       child: InputTextWidget(
                         focusNode: _focusNodes[1],
                         typeNumeric: true,
@@ -184,11 +213,11 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
                         onChanged: (v) {
                           _campo2(v);
                         },
-                        validator: controller.validaCampo2e3,
+                        validator: controller.boleto.validaCampo2e3,
                       ),
                     ),
                     Visibility(
-                      visible: controller.isVisivel(1),
+                      visible: controller.boleto.isVisivel(1),
                       child: InputTextWidget(
                         focusNode: _focusNodes[2],
                         typeNumeric: true,
@@ -198,35 +227,35 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
                         onChanged: (v) {
                           _campo3(v);
                         },
-                        validator: controller.validaCampo2e3,
+                        validator: controller.boleto.validaCampo2e3,
                       ),
                     ),
                     Visibility(
-                      visible: controller.isVisivel(2),
+                      visible: controller.boleto.isVisivel(2),
                       child: InputTextWidget(
                         focusNode: _focusNodes[3],
                         typeNumeric: true,
                         controller: barcodeInputTextController[3],
-                        label: "4ª parte (Dígito Verificador)",
+                        label: "4ª parte",
                         icon: FontAwesomeIcons.barcode,
                         onChanged: (v) {
                           _campo4(v);
                         },
-                        validator: controller.validaCampo4,
+                        validator: controller.boleto.validaCampo4,
                       ),
                     ),
                     Visibility(
-                      visible: controller.isVisivel(3),
+                      visible: controller.boleto.isVisivel(3),
                       child: InputTextWidget(
                         focusNode: _focusNodes[4],
                         typeNumeric: true,
                         controller: barcodeInputTextController[4],
-                        label: "5ª e última parte",
+                        label: "5ª parte",
                         icon: FontAwesomeIcons.barcode,
                         onChanged: (v) {
                           _campo5(v);
                         },
-                        validator: controller.validaCampo5,
+                        validator: controller.boleto.validaCampo5,
                       ),
                     ),
                   ],

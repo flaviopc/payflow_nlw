@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:payflow/modules/boletos/insert_boleto/insert_boleto_controller.dart';
+import 'package:payflow/shared/auth/auth_controller.dart';
 import 'package:payflow/shared/themes/app_colors.dart';
 import 'package:payflow/shared/themes/app_text_styles.dart';
 import 'package:payflow/shared/utils/boleto/boleto_utils.dart';
@@ -26,9 +27,9 @@ class _ConfirmacaoBoletoPageState extends State<ConfirmacaoBoletoPage> {
       MaskedTextController(mask: BoletoUtils.FORMAT_BOLETO);
 
   void setDadosBoleto() {
-    String data = controller.getDataVencimento();
-    String valor = controller.getValor();
-    barcodeInputTextController.text = controller.codigoBoleto;
+    String data = controller.boleto.getDataVencimento();
+    String valor = controller.boleto.getValor();
+    barcodeInputTextController.text = controller.boleto.codigoBoleto;
     moneyInputTextController.text = valor;
     dueDateInputTextController.text = data;
   }
@@ -39,7 +40,7 @@ class _ConfirmacaoBoletoPageState extends State<ConfirmacaoBoletoPage> {
         (widget.barcode!.length == 44 ||
             widget.barcode!.length == 47 ||
             widget.barcode!.length == 48)) {
-      controller.codigoBoleto = widget.barcode!;
+      controller.boleto.codigoBoleto = widget.barcode!;
 
       setState(() {
         setDadosBoleto();
@@ -92,10 +93,12 @@ class _ConfirmacaoBoletoPageState extends State<ConfirmacaoBoletoPage> {
                       label: "Código",
                       icon: FontAwesomeIcons.barcode,
                       onChanged: (v) => controller.onChange(barcode: v),
-                      validator: controller.validaCampo1,
+                      validator: controller.boleto.validaCampo1,
                     ),
                     InputTextWidget(
-                      habilitado: false,
+                      habilitado: controller.boleto.getDataVencimento().isEmpty
+                          ? true
+                          : false,
                       controller: dueDateInputTextController,
                       label: "Vencimento",
                       icon: FontAwesomeIcons.calendarCheck,
@@ -134,7 +137,15 @@ class _ConfirmacaoBoletoPageState extends State<ConfirmacaoBoletoPage> {
           secondaryOnPressed: () async {
             if (controller.formKey.currentState!.validate()) {
               await controller.cadastrarBoleto();
-              Navigator.popUntil(context, ModalRoute.withName("/home"));
+              //Não encontrei uma forma de atualizar a home a não ser enviar o
+              //o usuario novamente e recarregar
+              //Navigator.popUntil(context, ModalRoute.withName("/home"));
+              var auth = AuthController();
+              await auth.currentUser(context);
+
+              Navigator.pushNamedAndRemoveUntil(
+                  context, "/home", ModalRoute.withName("/home"),
+                  arguments: auth.user);
             }
           }),
     );
