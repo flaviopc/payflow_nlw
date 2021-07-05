@@ -1,18 +1,32 @@
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 
 class BoletoUtils {
-  static const FORMAT_BOLETO =
+  static const FORMAT_BOLETO_D =
       "00000.00000 00000.000000\n00000.000000 0 00000000000000";
-  static const FORMAT_BOLETO_C1 = "00000.00000";
-  static const FORMAT_BOLETO_C23 = "00000.000000";
-  static const FORMAT_BOLETO_C4 = "0";
-  static const FORMAT_BOLETO_C5 = "00000000000000";
-
+  static const FORMAT_BOLETO =
+      "0000 000000000000000\n00000 000000 00000000000000";
   static const FORMAT_CONCESSIONARIA_D =
       "00000000000-0 00000000000-0\n00000000000-0 00000000000-0";
   static const FORMAT_CONCESSIONARIA =
       "00000000000 00000000000\n00000000000 00000000000";
   static const FORMAT_CONCESSIONARIA_C = "00000000000-0";
+
+  ///Formato de mascara do boleto
+  ///0 - boleto normal com digito
+  ///1 - boleto normal sem digito
+  ///2 - boleto concessionaria com digito
+  ///3 - boleto concessionaria sem digito
+  static const FORMATS_BOLETO = [
+    FORMAT_BOLETO_D,
+    FORMAT_BOLETO,
+    FORMAT_CONCESSIONARIA_D,
+    FORMAT_CONCESSIONARIA
+  ];
+
+  static const FORMAT_BOLETO_C1 = "00000.00000";
+  static const FORMAT_BOLETO_C23 = "00000.000000";
+  static const FORMAT_BOLETO_C4 = "0";
+  static const FORMAT_BOLETO_C5 = "00000000000000";
 
   static const DATA_BASE = "1997-10-07";
   static const FORMAT_DATA = "dd/MM/yyyy";

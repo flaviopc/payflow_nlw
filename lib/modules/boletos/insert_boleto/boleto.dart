@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:intl/intl.dart';
 import 'package:payflow/shared/models/boleto_model.dart';
 import 'package:payflow/shared/utils/boleto/boleto_utils.dart';
@@ -9,6 +10,7 @@ class Boleto {
   final formKey = GlobalKey<FormState>();
   BoletoModel model = BoletoModel();
   List<bool> _campoVisivel = [false, false, false, false];
+  String maskCodigo = BoletoUtils.FORMATS_BOLETO[0];
 
   bool isVisivel(int index) => _campoVisivel[index];
   set campoVisivel(int index) => _campoVisivel[index] = true;
@@ -18,10 +20,41 @@ class Boleto {
 
   set codigoBoleto(String v) {
     _codigoBoleto = v.replaceAll(".", "").replaceAll("-", "");
-    eBoletoNormal =
-        codigoBoleto.startsWith(BoletoUtils.E_CONCESSIONARIA) ? false : true;
-    _campoVisivel =
-        eBoletoNormal ? [false, false, false, false] : [false, false, false];
+    escolheMask(codigoBoleto);
+    //_campoVisivel =eBoletoNormal ? [false, false, false, false] : [false, false, false];
+  }
+
+  List<MaskedTextController> escolheMaskCampos() {
+    if (codigoBoleto.length == 47) return BoletoUtils.maskBarcode(0);
+    return BoletoUtils.maskBarcode(1);
+  }
+
+  void escolheMask(String codigo) {
+    if (codigo.startsWith(BoletoUtils.E_CONCESSIONARIA)) {
+      eBoletoNormal = false;
+      if (codigo.length == 48)
+        maskCodigo = BoletoUtils.FORMATS_BOLETO[2];
+      else
+        maskCodigo = BoletoUtils.FORMATS_BOLETO[3];
+    } else {
+      eBoletoNormal = true;
+      if (codigo.length == 47)
+        maskCodigo = BoletoUtils.FORMATS_BOLETO[0];
+      else
+        maskCodigo = BoletoUtils.FORMATS_BOLETO[1];
+    }
+  }
+
+  List<String?> validacaoBoleto(String? value) {
+    return eBoletoNormal
+        ? [
+            validaCampo1(value),
+            validaCampo2e3(value),
+            validaCampo2e3(value),
+            validaCampo4(value),
+            validaCampo5(value),
+          ]
+        : List.generate(4, (index) => validaCampo(value));
   }
 
   String? validaCampo1(String? value) {
@@ -57,7 +90,7 @@ class Boleto {
   String? validaCampo(String? value) {
     if (value!.isEmpty)
       return "O código não pode ser vazio";
-    else if (value.length < 12)
+    else if (value.length < 13)
       return "O código está incompleto";
     else
       return null;
@@ -77,24 +110,28 @@ class Boleto {
   String getValorConcessionaria() {
     String codigo = codigoBoleto.length == 44
         ? codigoBoleto.substring(4, 15)
-        : codigoBoleto.substring(0, 11) + codigoBoleto.substring(13, 17);
+        : codigoBoleto.substring(4, 11) + codigoBoleto.substring(12, 16);
     String valor = codigo;
     return NumberFormat(BoletoUtils.FORMAT_VALOR).format(int.parse(valor));
   }
 
   String getDataVencimento() {
     String codigo = "";
-    if (codigoBoleto.length < 48 && codigoBoleto.length > 44)
-      codigo = divideCodigo()[4];
-    else
-      codigo = divideCodigo()[1];
-    if (codigo.length >= 4) {
-      String dias = codigo.substring(0, 4);
-      DateTime vencimento = DateUtils.addDaysToDate(
-          DateTime.parse(BoletoUtils.DATA_BASE), int.parse(dias));
-      return DateFormat(BoletoUtils.FORMAT_DATA).format(vencimento);
+    if (codigoBoleto.length == 47) codigo = divideCodigo()[4];
+    if (codigoBoleto.length == 44) codigo = divideCodigo()[1];
+    if (codigoBoleto.length == 48) return codigo;
+
+    if (eBoletoNormal) {
+      if (codigo.length >= 4) {
+        String dias = codigo.substring(0, 4);
+        DateTime vencimento = DateUtils.addDaysToDate(
+            DateTime.parse(BoletoUtils.DATA_BASE), int.parse(dias));
+        return DateFormat(BoletoUtils.FORMAT_DATA).format(vencimento);
+      } else {
+        return codigo;
+      }
     } else {
-      return codigo;
+      return "";
     }
   }
 
@@ -105,7 +142,7 @@ class Boleto {
       codigo[0] = codigoBoleto.substring(0, 12);
       codigo[1] = codigoBoleto.substring(12, 24);
       codigo[2] = codigoBoleto.substring(24, 36);
-      codigo[3] = codigoBoleto.substring(36, 48);
+      codigo[3] = codigoBoleto.substring(36);
     } else if (codigoBoleto.length == 47) {
       codigo[0] = codigoBoleto.substring(0, 10);
       codigo[1] = codigoBoleto.substring(10, 21);
@@ -113,11 +150,18 @@ class Boleto {
       codigo[3] = codigoBoleto.substring(32, 33);
       codigo[4] = codigoBoleto.substring(33);
     } else {
-      codigo[0] = codigoBoleto.substring(0, 5);
-      codigo[1] = codigoBoleto.substring(5, 19);
-      codigo[2] = codigoBoleto.substring(19, 24);
-      codigo[3] = codigoBoleto.substring(24, 30);
-      codigo[4] = codigoBoleto.substring(30);
+      if (eBoletoNormal) {
+        codigo[0] = codigoBoleto.substring(0, 4);
+        codigo[1] = codigoBoleto.substring(4, 19);
+        codigo[2] = codigoBoleto.substring(19, 24);
+        codigo[3] = codigoBoleto.substring(24, 30);
+        codigo[4] = codigoBoleto.substring(30);
+      } else {
+        codigo[0] = codigoBoleto.substring(0, 12);
+        codigo[1] = codigoBoleto.substring(12, 24);
+        codigo[2] = codigoBoleto.substring(24, 36);
+        codigo[3] = codigoBoleto.substring(36);
+      }
     }
     return codigo;
   }

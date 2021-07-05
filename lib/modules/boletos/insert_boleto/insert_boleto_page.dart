@@ -20,7 +20,6 @@ class InsertBoletoPage extends StatefulWidget {
 class _InsertBoletoPageState extends State<InsertBoletoPage> {
   final controller = InsertBoletoController();
   Boleto boleto = Boleto();
-  bool concessionaria = false;
   List<MaskedTextController> barcodeInputTextController =
       BoletoUtils.maskBarcode(0);
 
@@ -44,17 +43,18 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
         RegExp(BoletoUtils.REGEXP_BARCODE).hasMatch(dados) ||
         RegExp(BoletoUtils.REGEXP_CONCESSIONARIA).hasMatch(dados)) {
       controller.boleto.codigoBoleto = dados;
+      barcodeInputTextController = controller.boleto.escolheMaskCampos();
       var codigoDividido = controller.boleto.divideCodigo();
       controller.boleto.allCampoVisivel();
       setCodigos(codigoDividido);
-      goToConfirmacao(context);
+      // goToConfirmacao(context);
     } else {
       controller.msgErroBoleto(context);
     }
     setState(() {});
   }
 
-  void goToConfirmacao(BuildContext context) {
+  void goToConfirmacao(BuildContext context) async {
     if (controller.formKey.currentState!.validate()) {
       Navigator.pushNamed(context, "/confirma_boleto",
           arguments: controller.boleto.codigoBoleto);
@@ -68,7 +68,7 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
     barcodeInputTextController[1].text = codigoDividido[1];
     barcodeInputTextController[2].text = codigoDividido[2];
     barcodeInputTextController[3].text = codigoDividido[3];
-    if (!controller.boleto.eBoletoNormal)
+    if (controller.boleto.eBoletoNormal)
       barcodeInputTextController[4].text = codigoDividido[4];
   }
 
@@ -83,7 +83,6 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
     if (v.length == 2) {
       txt = barcodeInputTextController[0].text;
       if (v.startsWith(BoletoUtils.E_CONCESSIONARIA)) {
-        concessionaria = true;
         barcodeInputTextController = BoletoUtils.maskBarcode(1);
       } else {
         barcodeInputTextController = BoletoUtils.maskBarcode(0);
@@ -116,14 +115,14 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
   }
 
   void _campo4(String v) {
-    if (!concessionaria) {
+    if (controller.boleto.eBoletoNormal) {
       if (v.length == 1) {
         _proxCampo(3);
       }
     } else {
       if (v.length == 12) {
         _juntaCodigos();
-        goToConfirmacao(context);
+        //goToConfirmacao(context);
       }
     }
   }
@@ -131,19 +130,20 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
   void _campo5(String v) {
     if (v.length == 14) {
       _juntaCodigos();
-      goToConfirmacao(context);
+      //goToConfirmacao(context);
     }
   }
 
   void _juntaCodigos() {
-    controller.boleto.codigoBoleto = barcodeInputTextController[0].text +
+    String codigo = barcodeInputTextController[0].text +
         barcodeInputTextController[1].text +
         barcodeInputTextController[2].text +
         barcodeInputTextController[3].text;
 
-    if (controller.boleto.eBoletoNormal)
-      controller.boleto.codigoBoleto =
-          controller.boleto.codigoBoleto + barcodeInputTextController[4].text;
+    if (codigo.startsWith(BoletoUtils.E_CONCESSIONARIA))
+      codigo += barcodeInputTextController[4].text;
+
+    controller.boleto.codigoBoleto = codigo;
   }
 
   @override
@@ -200,7 +200,7 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
                       onChanged: (v) {
                         _campo1(v);
                       },
-                      validator: controller.boleto.validaCampo1,
+                      validator: (v) => controller.boleto.validacaoBoleto(v)[0],
                     ),
                     Visibility(
                       visible: controller.boleto.isVisivel(0),
@@ -213,7 +213,8 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
                         onChanged: (v) {
                           _campo2(v);
                         },
-                        validator: controller.boleto.validaCampo2e3,
+                        validator: (v) =>
+                            controller.boleto.validacaoBoleto(v)[1],
                       ),
                     ),
                     Visibility(
@@ -227,7 +228,8 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
                         onChanged: (v) {
                           _campo3(v);
                         },
-                        validator: controller.boleto.validaCampo2e3,
+                        validator: (v) =>
+                            controller.boleto.validacaoBoleto(v)[2],
                       ),
                     ),
                     Visibility(
@@ -241,23 +243,26 @@ class _InsertBoletoPageState extends State<InsertBoletoPage> {
                         onChanged: (v) {
                           _campo4(v);
                         },
-                        validator: controller.boleto.validaCampo4,
+                        validator: (v) =>
+                            controller.boleto.validacaoBoleto(v)[3],
                       ),
                     ),
-                    Visibility(
-                      visible: controller.boleto.isVisivel(3),
-                      child: InputTextWidget(
-                        focusNode: _focusNodes[4],
-                        typeNumeric: true,
-                        controller: barcodeInputTextController[4],
-                        label: "5ª parte",
-                        icon: FontAwesomeIcons.barcode,
-                        onChanged: (v) {
-                          _campo5(v);
-                        },
-                        validator: controller.boleto.validaCampo5,
+                    if (controller.boleto.eBoletoNormal)
+                      Visibility(
+                        visible: controller.boleto.isVisivel(3),
+                        child: InputTextWidget(
+                          focusNode: _focusNodes[4],
+                          typeNumeric: true,
+                          controller: barcodeInputTextController[4],
+                          label: "5ª parte",
+                          icon: FontAwesomeIcons.barcode,
+                          onChanged: (v) {
+                            _campo5(v);
+                          },
+                          validator: (v) =>
+                              controller.boleto.validacaoBoleto(v)[4],
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),

@@ -23,10 +23,12 @@ class _ConfirmacaoBoletoPageState extends State<ConfirmacaoBoletoPage> {
   final moneyInputTextController = MoneyMaskedTextController(leftSymbol: "R\$");
   final dueDateInputTextController =
       MaskedTextController(mask: BoletoUtils.MASK_DATA);
-  final barcodeInputTextController =
+  var barcodeInputTextController =
       MaskedTextController(mask: BoletoUtils.FORMAT_BOLETO);
 
   void setDadosBoleto() {
+    barcodeInputTextController =
+        MaskedTextController(mask: controller.boleto.maskCodigo);
     String data = controller.boleto.getDataVencimento();
     String valor = controller.boleto.getValor();
     barcodeInputTextController.text = controller.boleto.codigoBoleto;
@@ -93,7 +95,6 @@ class _ConfirmacaoBoletoPageState extends State<ConfirmacaoBoletoPage> {
                       label: "Código",
                       icon: FontAwesomeIcons.barcode,
                       onChanged: (v) => controller.onChange(barcode: v),
-                      validator: controller.boleto.validaCampo1,
                     ),
                     InputTextWidget(
                       habilitado: controller.boleto.getDataVencimento().isEmpty
