@@ -23,17 +23,14 @@ class _ConfirmacaoBoletoPageState extends State<ConfirmacaoBoletoPage> {
   final moneyInputTextController = MoneyMaskedTextController(leftSymbol: "R\$");
   final dueDateInputTextController =
       MaskedTextController(mask: BoletoUtils.MASK_DATA);
-  var barcodeInputTextController =
-      MaskedTextController(mask: BoletoUtils.FORMAT_BOLETO);
+  var barcodeInputTextController;
 
   void setDadosBoleto() {
     barcodeInputTextController =
         MaskedTextController(mask: controller.boleto.maskCodigo);
-    String data = controller.boleto.getDataVencimento();
-    String valor = controller.boleto.getValor();
     barcodeInputTextController.text = controller.boleto.codigoBoleto;
-    moneyInputTextController.text = valor;
-    dueDateInputTextController.text = data;
+    moneyInputTextController.text = controller.boleto.getValor();
+    dueDateInputTextController.text = controller.boleto.getDataVencimento();
   }
 
   @override

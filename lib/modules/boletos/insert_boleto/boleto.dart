@@ -97,17 +97,17 @@ class Boleto {
   }
 
   String getValor() {
-    return eBoletoNormal ? getValorBoleto() : getValorConcessionaria();
+    return eBoletoNormal ? _getValorBoleto() : _getValorConcessionaria();
   }
 
-  String getValorBoleto() {
+  String _getValorBoleto() {
     String codigo =
         codigoBoleto.length == 47 ? divideCodigo()[4] : divideCodigo()[1];
     String valor = codigo.substring(4);
     return NumberFormat(BoletoUtils.FORMAT_VALOR).format(int.parse(valor));
   }
 
-  String getValorConcessionaria() {
+  String _getValorConcessionaria() {
     String codigo = codigoBoleto.length == 44
         ? codigoBoleto.substring(4, 15)
         : codigoBoleto.substring(4, 11) + codigoBoleto.substring(12, 16);
@@ -151,8 +151,8 @@ class Boleto {
       codigo[4] = codigoBoleto.substring(33);
     } else {
       if (eBoletoNormal) {
-        codigo[0] = codigoBoleto.substring(0, 4);
-        codigo[1] = codigoBoleto.substring(4, 19);
+        codigo[0] = codigoBoleto.substring(0, 5);
+        codigo[1] = codigoBoleto.substring(5, 19);
         codigo[2] = codigoBoleto.substring(19, 24);
         codigo[3] = codigoBoleto.substring(24, 30);
         codigo[4] = codigoBoleto.substring(30);
