@@ -136,14 +136,16 @@ class Boleto {
   }
 
   List<String> divideCodigo() {
-    var codigo = List<String>.generate(5, (i) => "");
+    var codigo;
 
     if (codigoBoleto.length == 48) {
+      codigo = List<String>.generate(4, (i) => "");
       codigo[0] = codigoBoleto.substring(0, 12);
       codigo[1] = codigoBoleto.substring(12, 24);
       codigo[2] = codigoBoleto.substring(24, 36);
       codigo[3] = codigoBoleto.substring(36);
     } else if (codigoBoleto.length == 47) {
+      codigo = List<String>.generate(5, (i) => "");
       codigo[0] = codigoBoleto.substring(0, 10);
       codigo[1] = codigoBoleto.substring(10, 21);
       codigo[2] = codigoBoleto.substring(21, 32);
@@ -151,12 +153,14 @@ class Boleto {
       codigo[4] = codigoBoleto.substring(33);
     } else {
       if (eBoletoNormal) {
+        codigo = List<String>.generate(5, (i) => "");
         codigo[0] = codigoBoleto.substring(0, 5);
         codigo[1] = codigoBoleto.substring(5, 19);
         codigo[2] = codigoBoleto.substring(19, 24);
         codigo[3] = codigoBoleto.substring(24, 30);
         codigo[4] = codigoBoleto.substring(30);
       } else {
+        codigo = List<String>.generate(4, (i) => "");
         codigo[0] = codigoBoleto.substring(0, 12);
         codigo[1] = codigoBoleto.substring(12, 24);
         codigo[2] = codigoBoleto.substring(24, 36);
