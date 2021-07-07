@@ -26,16 +26,16 @@ class AppWidget extends StatelessWidget {
         primarySwatch: Colors.orange,
         primaryColor: AppColors.primary,
       ),
-      initialRoute: "/splash",
+      initialRoute: SplashPage.routeName,
       routes: {
-        "/splash": (context) => SplashPage(),
-        "/home": (context) => HomePage(
+        SplashPage.routeName: (context) => SplashPage(),
+        HomePage.routeName: (context) => HomePage(
               user: ModalRoute.of(context)!.settings.arguments as UserModel,
             ),
-        "/login": (context) => LoginPage(),
-        "/barcode_scanner": (context) => BarcodeScannerPage(),
-        "/insert_boleto": (context) => InsertBoletoPage(),
-        "/confirma_boleto": (context) => ConfirmacaoBoletoPage(
+        LoginPage.routeName: (context) => LoginPage(),
+        BarcodeScannerPage.routeName: (context) => BarcodeScannerPage(),
+        InsertBoletoPage.routeName: (context) => InsertBoletoPage(),
+        ConfirmacaoBoletoPage.routeName: (context) => ConfirmacaoBoletoPage(
               barcode: ModalRoute.of(context) != null
                   ? ModalRoute.of(context)!.settings.arguments.toString()
                   : "",

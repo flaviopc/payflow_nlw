@@ -7,6 +7,7 @@ import 'package:payflow/shared/widgets/bottom_sheet/bottom_sheet_widget.dart';
 import 'package:payflow/shared/widgets/set_label_buttons/set_label_buttons.dart';
 
 class BarcodeScannerPage extends StatefulWidget {
+  static const String routeName = "/barcode_scanner";
   const BarcodeScannerPage({Key? key}) : super(key: key);
 
   @override

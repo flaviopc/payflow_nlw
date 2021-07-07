@@ -10,6 +10,7 @@ import 'package:payflow/shared/widgets/input_text/input_text_widget.dart';
 import 'package:payflow/shared/widgets/set_label_buttons/set_label_buttons.dart';
 
 class ConfirmacaoBoletoPage extends StatefulWidget {
+  static const String routeName = "/confirma_boleto";
   final String? barcode;
 
   const ConfirmacaoBoletoPage({Key? key, this.barcode}) : super(key: key);

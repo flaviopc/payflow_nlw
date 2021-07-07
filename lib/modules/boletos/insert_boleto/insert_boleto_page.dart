@@ -11,6 +11,7 @@ import 'package:payflow/shared/widgets/input_text/input_text_widget.dart';
 import 'package:payflow/shared/widgets/set_label_buttons/set_label_buttons.dart';
 
 class InsertBoletoPage extends StatefulWidget {
+  static const String routeName = "/insert_boleto";
   const InsertBoletoPage({Key? key}) : super(key: key);
 
   @override

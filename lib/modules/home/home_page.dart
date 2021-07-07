@@ -7,6 +7,7 @@ import 'package:payflow/shared/themes/app_colors.dart';
 import 'package:payflow/shared/themes/app_text_styles.dart';
 
 class HomePage extends StatefulWidget {
+  static const String routeName = "/home";
   final UserModel user;
   const HomePage({Key? key, required this.user}) : super(key: key);
 

@@ -6,6 +6,7 @@ import 'package:payflow/shared/themes/app_text_styles.dart';
 import 'package:payflow/shared/widgets/social_login/social_login_button.dart';
 
 class LoginPage extends StatefulWidget {
+  static const String routeName = "/login";
   const LoginPage({Key? key}) : super(key: key);
 
   @override

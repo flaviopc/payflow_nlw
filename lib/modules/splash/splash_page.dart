@@ -4,6 +4,7 @@ import 'package:payflow/shared/themes/app_colors.dart';
 import 'package:payflow/shared/themes/app_images.dart';
 
 class SplashPage extends StatelessWidget {
+  static const String routeName = "/splash";
   const SplashPage({Key? key}) : super(key: key);
 
   @override
